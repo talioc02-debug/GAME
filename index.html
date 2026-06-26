@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRINDLE · Chapters 1–3 · Word Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Gochi+Hand&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef2f6;
+    --paper-line:#cdd9e6;
+    --ink:#1d2a44;
+    --ink-soft:#4a5a76;
+    --margin-red:#e8453c;
+    --nick:#ff7a3d;       /* creative, energetic boy */
+    --nick-dark:#d65a1e;
+    --granger:#138a74;    /* strict, bookish teacher */
+    --granger-dark:#0c5f50;
+    --gold:#f4b740;
+    --correct:#2faa6a;
+    --wrong:#e8453c;
+    --card:#ffffff;
+    --shadow:0 10px 0 rgba(29,42,68,.10), 0 18px 40px rgba(29,42,68,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0 / 100% 32px,
+      var(--paper);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  /* red notebook margin line */
+  body::before{
+    content:"";position:fixed;top:0;left:46px;width:2px;height:100%;
+    background:var(--margin-red);opacity:.5;z-index:0;pointer-events:none;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:0 16px 120px 60px;position:relative;z-index:1}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:30;background:rgba(238,242,246,.92);
+    backdrop-filter:blur(6px);padding:10px 0 8px;margin-bottom:14px;
+    border-bottom:2px dashed var(--paper-line)}
+  .topbar-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .brand{font-family:'Baloo 2';font-weight:800;font-size:1.15rem;letter-spacing:.5px;color:var(--ink)}
+  .brand b{color:var(--margin-red)}
+  .score-chip{font-family:'Baloo 2';font-weight:800;background:var(--ink);color:#fff;
+    padding:6px 14px;border-radius:999px;font-size:1rem;white-space:nowrap;
+    box-shadow:0 4px 0 rgba(29,42,68,.25)}
+  .score-chip .pts{color:var(--gold)}
+  .dots{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .dot{font-size:.72rem;font-weight:700;color:var(--ink-soft);background:#dfe7ef;
+    padding:3px 9px;border-radius:999px;border:1.5px solid transparent;transition:.2s}
+  .dot.active{background:var(--ink);color:#fff}
+  .dot.done{background:var(--correct);color:#fff}
+
+  /* ---------- screens ---------- */
+  .screen{display:none;animation:pop .35s cubic-bezier(.2,1.2,.4,1)}
+  .screen.show{display:block}
+  @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+
+  h1{font-family:'Baloo 2';font-weight:800;font-size:2.1rem;line-height:1.05;margin-bottom:6px}
+  h2{font-family:'Baloo 2';font-weight:800;font-size:1.5rem;margin-bottom:4px}
+  .eyebrow{font-family:'Gochi Hand';font-size:1.3rem;color:var(--margin-red);transform:rotate(-2deg);display:inline-block}
+  .lead{font-size:1.05rem;color:var(--ink-soft);margin-bottom:18px;max-width:60ch}
+  .hand{font-family:'Gochi Hand'}
+
+  .panel{background:var(--card);border:2px solid var(--ink);border-radius:18px;
+    padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+
+  /* buttons */
+  .btn{font-family:'Baloo 2';font-weight:800;font-size:1.05rem;cursor:pointer;border:2px solid var(--ink);
+    background:var(--gold);color:var(--ink);padding:12px 22px;border-radius:14px;
+    box-shadow:0 5px 0 var(--ink);transition:transform .08s,box-shadow .08s;}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .btn.big{font-size:1.3rem;padding:16px 30px}
+  .btn.ghost{background:#fff}
+  .btn.go{background:var(--nick);color:#fff;border-color:var(--nick-dark);box-shadow:0 5px 0 var(--nick-dark)}
+  .btn:focus-visible{outline:3px solid var(--granger);outline-offset:3px}
+  .btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+  /* movement / fidget callout */
+  .move{font-family:'Gochi Hand';font-size:1.35rem;background:#fff7e6;border:2px dashed var(--gold);
+    border-radius:14px;padding:12px 16px;color:var(--nick-dark);margin:14px 0;display:flex;gap:10px;align-items:center}
+  .move .emoji{font-size:1.7rem}
+
+  /* ---------- characters ---------- */
+  .char-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:620px){.char-grid{grid-template-columns:1fr}}
+  .char{border-radius:18px;border:2px solid var(--ink);padding:18px;color:#fff;box-shadow:var(--shadow);text-align:center}
+  .char.nick{background:linear-gradient(160deg,#ff945e,var(--nick))}
+  .char.granger{background:linear-gradient(160deg,#1ba98e,var(--granger))}
+  .char .avatar{font-size:3.4rem;line-height:1}
+  .char h3{font-family:'Baloo 2';font-size:1.45rem;margin:6px 0 2px}
+  .char .role{font-weight:800;opacity:.95;font-size:.9rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .char ul{list-style:none;text-align:left;font-size:.98rem;font-weight:600}
+  .char li{padding:3px 0 3px 22px;position:relative}
+  .char li::before{content:"★";position:absolute;left:0;color:var(--gold)}
+  .char .voice{margin-top:10px;background:rgba(255,255,255,.22);border:2px solid #fff;color:#fff;
+    font-family:'Baloo 2';font-weight:800;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .char .voice:active{transform:scale(.96)}
+
+  /* chirp big button */
+  .chirp-hero{display:flex;flex-direction:column;align-items:center;gap:8px;margin:18px 0}
+  .chirp-btn{font-family:'Baloo 2';font-weight:800;font-size:1.4rem;color:#fff;cursor:pointer;
+    background:radial-gradient(circle at 35% 30%,#3aa0ff,#1d6fd0);border:3px solid var(--ink);
+    border-radius:999px;padding:18px 34px;box-shadow:0 7px 0 #14538f;display:flex;align-items:center;gap:12px}
+  .chirp-btn:active{transform:translateY(5px);box-shadow:0 2px 0 #14538f}
+  .chirp-btn .bird{font-size:1.8rem}
+
+  /* floating fidget chirp */
+  .fab{position:fixed;right:16px;bottom:16px;z-index:40;width:60px;height:60px;border-radius:50%;
+    border:3px solid var(--ink);background:#3aa0ff;color:#fff;font-size:1.6rem;cursor:pointer;
+    box-shadow:0 6px 0 #14538f;display:flex;align-items:center;justify-content:center}
+  .fab:active{transform:translateY(4px);box-shadow:0 2px 0 #14538f}
+
+  /* ---------- quiz / options ---------- */
+  .clue{font-family:'Gochi Hand';font-size:1.7rem;color:var(--ink);background:#fff;border:2px solid var(--ink);
+    border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);min-height:90px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}}
+  .opt{font-family:'Baloo 2';font-weight:700;font-size:1.1rem;cursor:pointer;background:#fff;
+    border:2px solid var(--ink);border-radius:14px;padding:16px;box-shadow:0 5px 0 var(--ink);transition:transform .08s}
+  .opt:hover{transform:translateY(-2px)}
+  .opt:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+  .opt.correct{background:var(--correct);color:#fff;border-color:#1c7a4a;box-shadow:0 5px 0 #1c7a4a}
+  .opt.wrong{background:var(--wrong);color:#fff;border-color:#a32b23;box-shadow:0 5px 0 #a32b23}
+  .opt:disabled{cursor:default}
+  .shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+  .reveal{display:none;text-align:center;animation:pop .3s}
+  .reveal.show{display:block}
+  .reveal .big-emoji{font-size:3.4rem}
+
+  /* ---------- match game ---------- */
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:560px){.match-grid{grid-template-columns:1fr 1fr}}
+  .match-col{display:flex;flex-direction:column;gap:10px}
+  .col-label{font-family:'Baloo 2';font-weight:800;text-align:center;color:var(--ink-soft);margin-bottom:2px}
+  .tile{font-family:'Baloo 2';font-weight:800;font-size:1.15rem;cursor:pointer;background:#fff;
+    border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:0 5px 0 var(--ink);transition:.12s;text-align:center}
+  .tile.pic{font-size:2.2rem;padding:10px}
+  .tile:hover{transform:translateY(-2px)}
+  .tile.sel{background:var(--gold);transform:translateY(-2px)}
+  .tile.locked{background:var(--correct);color:#fff;border-color:#1c7a4a;box-shadow:0 5px 0 #1c7a4a;cursor:default;opacity:.95}
+  .tile.miss{animation:shake .4s}
+
+  /* progress within mission */
+  .mini-prog{height:12px;background:#dfe7ef;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin:6px 0 16px}
+  .mini-prog > i{display:block;height:100%;width:0;background:var(--nick);transition:width .3s}
+
+  .toast{position:fixed;left:50%;top:80px;transform:translateX(-50%);z-index:60;
+    background:var(--ink);color:#fff;font-family:'Baloo 2';font-weight:800;padding:12px 20px;border-radius:14px;
+    box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}
+  .toast.show{opacity:1;top:96px}
+  .toast .def{display:block;font-family:'Nunito';font-weight:600;font-size:.85rem;opacity:.85;margin-top:2px}
+
+  .float-pts{position:fixed;z-index:70;font-family:'Baloo 2';font-weight:800;color:var(--gold);
+    font-size:1.6rem;pointer-events:none;text-shadow:0 2px 0 var(--ink);animation:floatup 1s ease-out forwards}
+  @keyframes floatup{to{transform:translateY(-60px);opacity:0}}
+
+  /* timer bar (boss) */
+  .timer{height:14px;background:#dfe7ef;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .timer > i{display:block;height:100%;background:var(--margin-red);width:100%}
+
+  /* win */
+  .badge{font-size:5rem;text-align:center;animation:spin 3s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .win-score{font-family:'Baloo 2';font-weight:800;font-size:2.6rem;text-align:center;color:var(--nick)}
+
+  .note{font-size:.82rem;color:var(--ink-soft);margin-top:8px}
+  .center{text-align:center}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="topbar-row">
+      <div class="brand"><b>FRINDLE</b> · Word Lab · Ch. 1–3</div>
+      <div class="score-chip">⭐ <span class="pts" id="score">0</span> pts</div>
+    </div>
+    <div class="dots" id="dots">
+      <span class="dot" data-i="0">Start</span>
+      <span class="dot" data-i="1">1 · Who?</span>
+      <span class="dot" data-i="2">2 · Match</span>
+      <span class="dot" data-i="3">3 · Detective</span>
+      <span class="dot" data-i="4">★ Boss</span>
+      <span class="dot" data-i="5">Win</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===== SCREEN 0: START / CHARACTERS ===== -->
+  <section class="screen show" id="s0">
+    <span class="eyebrow">A book about a kid who breaks the rules… with WORDS</span>
+    <h1>Welcome to the Word Lab! 🔬</h1>
+    <p class="lead">In <b>Frindle</b>, a clever boy named Nick loves making school more fun. Let's meet the two stars of Chapters 1–3, collect points, and play. Ready, word inventor?</p>
+
+    <div class="char-grid">
+      <div class="char nick">
+        <div class="avatar">🧑‍🦰</div>
+        <h3>Nick Allen</h3>
+        <div class="role">The Idea Machine</div>
+        <ul>
+          <li>5th-grade boy, super <b>clever</b></li>
+          <li>Full of fun <b>ideas</b></li>
+          <li>Once turned class into a tropical island 🌴</li>
+          <li>Invented the secret bird <b>chirp</b> 🐦</li>
+        </ul>
+        <button class="voice" onclick="say('Hi! I love making boring days fun!')">🔊 Nick's voice</button>
+      </div>
+      <div class="char granger">
+        <div class="avatar">👩‍🏫</div>
+        <h3>Mrs. Granger</h3>
+        <div class="role">The Word Boss</div>
+        <ul>
+          <li>Strict English <b>teacher</b></li>
+          <li>LOVES the <b>dictionary</b> 📖</li>
+          <li>Sharp <b>eyes</b> that see everything 👀</li>
+          <li>Gives LOTS of vocabulary work</li>
+        </ul>
+        <button class="voice" onclick="say('Open your dictionaries, please.')">🔊 Granger's voice</button>
+      </div>
+    </div>
+
+    <div class="chirp-hero">
+      <button class="chirp-btn" onclick="chirp()"><span class="bird">🐦</span> PRESS TO CHIRP!</button>
+      <span class="hand" style="font-size:1.2rem;color:var(--ink-soft)">This is Nick's famous sound from Chapter 1</span>
+    </div>
+
+    <div class="move"><span class="emoji">🦅</span> Stand up and do the chirp <b>out loud</b> with Nick — 3 times!</div>
+
+    <div class="center"><button class="btn go big" onclick="goTo(1)">Start Mission 1 →</button></div>
+  </section>
+
+  <!-- ===== SCREEN 1: WHO IS IT? (FLASHCARDS) ===== -->
+  <section class="screen" id="s1">
+    <span class="eyebrow">Mission 1</span>
+    <h2>🎴 Who is it?</h2>
+    <p class="lead">Read the clue. Tap the right character. The card flips to show you more!</p>
+    <div class="mini-prog"><i id="m1prog"></i></div>
+
+    <div id="m1quiz">
+      <div class="clue" id="m1clue"></div>
+      <div class="opts" id="m1opts"></div>
+    </div>
+
+    <div class="reveal panel" id="m1reveal">
+      <div class="big-emoji" id="m1avatar"></div>
+      <h2 id="m1name"></h2>
+      <p id="m1facts" style="margin:6px 0 14px;font-weight:600"></p>
+      <button class="btn go" onclick="m1next()" id="m1nextBtn">Next →</button>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 2: VOCAB MATCH ===== -->
+  <section class="screen" id="s2">
+    <span class="eyebrow">Mission 2</span>
+    <h2>🧩 Match the Word</h2>
+    <p class="lead">Tap a <b>word</b>, then tap its <b>picture</b>. Match them all to win!</p>
+    <div class="mini-prog"><i id="m2prog"></i></div>
+    <div class="match-grid">
+      <div class="match-col">
+        <div class="col-label">WORDS</div>
+        <div id="m2words"></div>
+      </div>
+      <div class="match-col">
+        <div class="col-label">PICTURES</div>
+        <div id="m2pics"></div>
+      </div>
+    </div>
+    <div class="center" id="m2done" style="display:none;margin-top:18px">
+      <div class="move"><span class="emoji">🎉</span> All matched! Say each word out loud, then move on.</div>
+      <button class="btn go big" onclick="goTo(3)">Mission 3 →</button>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 3: STORY DETECTIVE ===== -->
+  <section class="screen" id="s3">
+    <span class="eyebrow">Mission 3</span>
+    <h2>🔎 Story Detective</h2>
+    <p class="lead">What really happened in Chapters 1–3? Tap the right answer.</p>
+    <div class="mini-prog"><i id="m3prog"></i></div>
+    <div class="clue" id="m3q" style="font-family:'Baloo 2';font-size:1.25rem"></div>
+    <div class="opts" id="m3opts"></div>
+    <div class="center" id="m3done" style="display:none;margin-top:18px">
+      <button class="btn go big" onclick="goTo(4)">★ BOSS ROUND →</button>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 4: BOSS ROUND ===== -->
+  <section class="screen" id="s4">
+    <span class="eyebrow">★ Boss Round · double points!</span>
+    <h2>⚡ Speed Review</h2>
+    <p class="lead">Quick! Mixed questions, <b>40 points</b> each. Beat the timer.</p>
+    <div class="timer"><i id="bossTimer"></i></div>
+    <div class="mini-prog"><i id="m4prog"></i></div>
+    <div class="clue" id="bq" style="font-family:'Baloo 2';font-size:1.2rem"></div>
+    <div class="opts" id="bopts"></div>
+    <div class="center" id="bdone" style="display:none;margin-top:18px">
+      <button class="btn go big" onclick="goTo(5)">See my score! 🏆</button>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 5: WIN ===== -->
+  <section class="screen" id="s5">
+    <div class="badge">🏅</div>
+    <h1 class="center">You're an Official Word Inventor!</h1>
+    <div class="win-score"><span id="finalScore">0</span> points</div>
+    <p class="lead center" style="margin:14px auto" id="finalMsg"></p>
+
+    <div class="panel">
+      <h2 class="center">🎤 Final Challenge — like Nick!</h2>
+      <p class="center" style="font-weight:600">In the next chapters, Nick <b>invents a brand-new word</b> for a pen: <span class="hand" style="font-size:1.5rem;color:var(--margin-red)">"frindle"</span>!</p>
+      <p class="center" style="margin-top:10px">👉 Your turn: <b>invent a fun new word</b> for something in your room. Say it to your teacher and explain what it means!</p>
+    </div>
+
+    <div class="center btn-row" style="justify-content:center">
+      <button class="chirp-btn" onclick="chirp()"><span class="bird">🐦</span> Victory chirp!</button>
+      <button class="btn ghost" onclick="restart()">↺ Play again</button>
+    </div>
+  </section>
+
+</div>
+
+<button class="fab" title="Chirp!" onclick="chirp()">🐦</button>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ SOUND (Web Audio, no files) ============ */
+let AC;
+function ac(){ if(!AC){ AC = new (window.AudioContext||window.webkitAudioContext)(); } if(AC.state==='suspended') AC.resume(); return AC; }
+function tone(freq,start,dur,type='sine',vol=.2){
+  const c=ac(),o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);
+  const t=c.currentTime+start;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);
+  g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.start(t);o.stop(t+dur+.02);
+}
+function ding(){ tone(880,0,.12,'sine',.2); tone(1320,.09,.18,'sine',.2); }
+function buzz(){ tone(160,0,.18,'square',.12); }
+function chirp(){
+  const c=ac();
+  for(let k=0;k<3;k++){
+    const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.connect(g);g.connect(c.destination);
+    const t=c.currentTime+k*.16;
+    o.frequency.setValueAtTime(2100,t);
+    o.frequency.exponentialRampToValueAtTime(3600,t+.06);
+    o.frequency.exponentialRampToValueAtTime(1900,t+.12);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);
+    g.gain.exponentialRampToValueAtTime(.001,t+.14);
+    o.start(t);o.stop(t+.16);
+  }
+}
+function fanfare(){ [523,659,784,1046].forEach((f,i)=>tone(f,i*.12,.3,'triangle',.22)); }
+/* tiny robotic 'voice' so characters feel alive even with no TTS */
+function say(text){
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance(text);u.rate=.95;u.pitch=1.1;
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  } else { ding(); }
+  toast(text);
+}
+
+/* ============ SCORE + UI ============ */
+let score=0, current=0;
+function addPts(n,ev){
+  score+=n; document.getElementById('score').textContent=score;
+  ding();
+  const f=document.createElement('div');f.className='float-pts';f.textContent='+'+n;
+  const x=ev?ev.clientX:window.innerWidth/2, y=ev?ev.clientY:120;
+  f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);
+  setTimeout(()=>f.remove(),1000);
+}
+let toastTimer;
+function toast(msg,def){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg+(def?`<span class="def">${def}</span>`:'');
+  t.classList.add('show');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function goTo(i){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+  document.getElementById('s'+i).classList.add('show');
+  current=i;
+  document.querySelectorAll('.dot').forEach(d=>{
+    const di=+d.dataset.i;
+    d.classList.toggle('active',di===i);
+    d.classList.toggle('done',di<i);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(i===1) m1start();
+  if(i===2) m2start();
+  if(i===3) m3start();
+  if(i===4) bossStart();
+  if(i===5) winScreen();
+}
+document.querySelectorAll('.dot').forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.i)));
+
+/* ============ MISSION 1: WHO IS IT? ============ */
+const M1=[
+  {avatar:'🧑‍🦰',name:'Nick Allen',clue:'I am in 5th grade and I LOVE inventing fun ideas. Once I turned the classroom into a tropical island!',
+   facts:'Clever, creative, and a little cheeky — Nick makes school more fun for everyone.',opts:['Nick Allen','Mrs. Granger','The Principal']},
+  {avatar:'👩‍🏫',name:'Mrs. Granger',clue:'I am a strict teacher. I LOVE the dictionary and I give lots of vocabulary work. My eyes see everything!',
+   facts:'The "word boss" — she has taught for many years and adores every word in the dictionary.',opts:['Nick Allen','Mrs. Granger','Janet']},
+  {avatar:'🐦',name:'The Chirp',clue:'I am the secret sound the whole class learned to make. The teachers could never find me!',
+   facts:'Nick taught the class this bird "chirp" in Chapter 1 — it drove the teachers a little crazy.',opts:['The Chirp','The Dictionary','The Bell']},
+  {avatar:'📖',name:'The Dictionary',clue:'I am Mrs. Granger\'s favourite book. I am in every classroom. I tell you what every word means!',
+   facts:'In Chapter 3, Nick asks where words come from — and Mrs. Granger sends him to ME for the answer.',opts:['The Dictionary','The Notebook','The Map']},
+];
+let m1i=0;
+function m1start(){ m1i=0; m1render(); }
+function m1render(){
+  document.getElementById('m1quiz').style.display='block';
+  document.getElementById('m1reveal').classList.remove('show');
+  document.getElementById('m1prog').style.width=(m1i/M1.length*100)+'%';
+  const q=M1[m1i];
+  document.getElementById('m1clue').textContent='“'+q.clue+'”';
+  const box=document.getElementById('m1opts');box.innerHTML='';
+  const opts=[...q.opts].sort(()=>Math.random()-.5);
+  opts.forEach(name=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=name;
+    b.onclick=(e)=>{
+      if(name===q.name){
+        b.classList.add('correct');addPts(20,e);
+        setTimeout(()=>{
+          document.getElementById('m1quiz').style.display='none';
+          document.getElementById('m1avatar').textContent=q.avatar;
+          document.getElementById('m1name').textContent=q.name;
+          document.getElementById('m1facts').textContent=q.facts;
+          document.getElementById('m1reveal').classList.add('show');
+        },450);
+      } else { b.classList.add('wrong','shake');buzz();
+        setTimeout(()=>b.classList.remove('shake'),400);
+        b.disabled=true; }
+    };
+    box.appendChild(b);
+  });
+}
+function m1next(){
+  m1i++;
+  if(m1i>=M1.length){ document.getElementById('m1prog').style.width='100%';
+    toast('Mission 1 complete! 🎉'); setTimeout(()=>goTo(2),600); }
+  else m1render();
+}
+
+/* ============ MISSION 2: VOCAB MATCH ============ */
+const VOCAB=[
+  {w:'idea',p:'💡',def:'a new thought or plan'},
+  {w:'dictionary',p:'📖',def:'a book that explains what words mean'},
+  {w:'teacher',p:'👩‍🏫',def:'a person who helps you learn'},
+  {w:'pencil',p:'✏️',def:'you use it to write'},
+  {w:'question',p:'❓',def:'something you ask'},
+  {w:'homework',p:'📝',def:'school work you do at home'},
+  {w:'bird',p:'🐦',def:'it can chirp and fly — like Nick\'s sound'},
+  {w:'school',p:'🏫',def:'the place where you learn'},
+  {w:'brain',p:'🧠',def:'you use it to think — Nick is clever!'},
+  {w:'eyes',p:'👀',def:'you use them to see — Mrs. Granger\'s are sharp'},
+];
+let m2sel=null, m2matched=0;
+function m2start(){
+  m2matched=0;m2sel=null;
+  document.getElementById('m2done').style.display='none';
+  document.getElementById('m2prog').style.width='0%';
+  const wc=document.getElementById('m2words'),pc=document.getElementById('m2pics');
+  wc.innerHTML='';pc.innerHTML='';
+  const words=[...VOCAB].sort(()=>Math.random()-.5);
+  const pics=[...VOCAB].sort(()=>Math.random()-.5);
+  words.forEach(v=>{
+    const t=document.createElement('button');t.className='tile';t.textContent=v.w;t.dataset.w=v.w;
+    t.style.marginBottom='10px';
+    t.onclick=()=>selWord(t,v);wc.appendChild(t);
+  });
+  pics.forEach(v=>{
+    const t=document.createElement('button');t.className='tile pic';t.textContent=v.p;t.dataset.w=v.w;
+    t.style.marginBottom='10px';
+    t.onclick=(e)=>selPic(t,v,e);pc.appendChild(t);
+  });
+}
+function selWord(el,v){
+  if(el.classList.contains('locked'))return;
+  document.querySelectorAll('#m2words .tile').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');m2sel=v;
+}
+function selPic(el,v,e){
+  if(el.classList.contains('locked'))return;
+  if(!m2sel){ toast('Tap a WORD first 👈');return; }
+  if(m2sel.w===v.w){
+    el.classList.add('locked');
+    document.querySelector(`#m2words .tile[data-w="${CSS.escape(v.w)}"]`).classList.add('locked');
+    addPts(15,e); toast(v.w.toUpperCase()+' ✓', v.def);
+    m2sel=null;m2matched++;
+    document.getElementById('m2prog').style.width=(m2matched/VOCAB.length*100)+'%';
+    if(m2matched===VOCAB.length){ fanfare();
+      document.getElementById('m2done').style.display='block'; }
+  } else {
+    el.classList.add('miss');buzz();setTimeout(()=>el.classList.remove('miss'),400);
+  }
+}
+
+/* ============ MISSION 3: STORY DETECTIVE ============ */
+const M3=[
+  {q:'What grade is Nick in?',opts:['5th grade','1st grade','High school'],a:'5th grade'},
+  {q:'What did Nick once turn his classroom into?',opts:['A tropical island 🌴','A spaceship','A swimming pool'],a:'A tropical island 🌴'},
+  {q:'What does Mrs. Granger LOVE?',opts:['The dictionary 📖','Football','Pizza'],a:'The dictionary 📖'},
+  {q:'Why does Nick ask a question at the end of class?',opts:['To waste time and delay homework','Because he is hungry','To go to the bathroom'],a:'To waste time and delay homework'},
+  {q:'Nick asks: "Where do ___ come from?"',opts:['words','cars','animals'],a:'words'},
+  {q:'How did Mrs. Granger answer Nick\'s clever question?',opts:['She gave him a report to do — his trick backfired!','She gave him candy','She sent him home'],a:'She gave him a report to do — his trick backfired!'},
+];
+let m3i=0;
+function m3start(){ m3i=0; document.getElementById('m3done').style.display='none'; m3render(); }
+function m3render(){
+  document.getElementById('m3prog').style.width=(m3i/M3.length*100)+'%';
+  const q=M3[m3i];
+  document.getElementById('m3q').textContent=q.q;
+  const box=document.getElementById('m3opts');box.innerHTML='';
+  [...q.opts].sort(()=>Math.random()-.5).forEach(o=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=(e)=>{
+      if(o===q.a){ b.classList.add('correct');addPts(15,e);
+        document.querySelectorAll('#m3opts .opt').forEach(x=>x.disabled=true);
+        setTimeout(m3next,650);
+      } else { b.classList.add('wrong','shake');buzz();b.disabled=true;
+        setTimeout(()=>b.classList.remove('shake'),400); }
+    };
+    box.appendChild(b);
+  });
+}
+function m3next(){
+  m3i++;
+  if(m3i>=M3.length){ document.getElementById('m3prog').style.width='100%';
+    document.getElementById('m3q').textContent='Great detective work! 🕵️';
+    document.getElementById('m3opts').innerHTML='';
+    document.getElementById('m3done').style.display='block'; }
+  else m3render();
+}
+
+/* ============ BOSS ROUND ============ */
+const BOSS=[
+  {q:'🐦 What is Nick\'s famous sound?',opts:['A chirp','A drum','A whistle'],a:'A chirp'},
+  {q:'Match: 💡 means…',opts:['idea','school','eyes'],a:'idea'},
+  {q:'Who loves the dictionary?',opts:['Mrs. Granger','Nick','The principal'],a:'Mrs. Granger'},
+  {q:'Match: 📖 means…',opts:['dictionary','pencil','bird'],a:'dictionary'},
+  {q:'Nick is very… (clever / lazy / shy?)',opts:['clever','lazy','shy'],a:'clever'},
+  {q:'In Chapter 3, Nick gets a… as homework.',opts:['report','holiday','prize'],a:'report'},
+];
+let bi=0, bossInt=null;
+function bossStart(){ bi=0; document.getElementById('bdone').style.display='none'; bossRender(); }
+function bossRender(){
+  document.getElementById('m4prog').style.width=(bi/BOSS.length*100)+'%';
+  const q=BOSS[bi];
+  document.getElementById('bq').textContent=q.q;
+  const box=document.getElementById('bopts');box.innerHTML='';
+  let answered=false;
+  [...q.opts].sort(()=>Math.random()-.5).forEach(o=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=(e)=>{ if(answered)return; answered=true; clearInterval(bossInt);
+      if(o===q.a){ b.classList.add('correct');addPts(40,e); }
+      else { b.classList.add('wrong');buzz();
+        [...box.children].forEach(x=>{if(x.textContent===q.a)x.classList.add('correct')}); }
+      document.querySelectorAll('#bopts .opt').forEach(x=>x.disabled=true);
+      setTimeout(bossNext,750);
+    };
+    box.appendChild(b);
+  });
+  // timer (gentle: runs out = just move on, no penalty)
+  const bar=document.getElementById('bossTimer');bar.style.transition='none';bar.style.width='100%';
+  let t=12.0;
+  setTimeout(()=>{bar.style.transition='width 1s linear';},20);
+  clearInterval(bossInt);
+  bossInt=setInterval(()=>{
+    t-=1; bar.style.width=(t/12*100)+'%';
+    if(t<=0){ clearInterval(bossInt); if(!answered){answered=true;
+      document.querySelectorAll('#bopts .opt').forEach(x=>x.disabled=true);
+      buzz();[...box.children].forEach(x=>{if(x.textContent===q.a)x.classList.add('correct')});
+      setTimeout(bossNext,800);} }
+  },1000);
+}
+function bossNext(){
+  bi++;
+  if(bi>=BOSS.length){ clearInterval(bossInt);
+    document.getElementById('m4prog').style.width='100%';
+    document.getElementById('bq').textContent='BOSS DEFEATED! ⚡';
+    document.getElementById('bopts').innerHTML='';
+    document.getElementById('bossTimer').style.width='0%';
+    fanfare();
+    document.getElementById('bdone').style.display='block'; }
+  else bossRender();
+}
+
+/* ============ WIN ============ */
+function winScreen(){
+  document.getElementById('finalScore').textContent=score;
+  let msg;
+  if(score>=380) msg='WOW — a perfect word inventor! Mrs. Granger would be impressed. 🌟';
+  else if(score>=250) msg='Brilliant work! You really know Chapters 1–3. 🎉';
+  else msg='Great effort! Try again to beat your score. 💪';
+  document.getElementById('finalMsg').textContent=msg;
+  fanfare();setTimeout(chirp,500);
+}
+function restart(){ score=0;document.getElementById('score').textContent='0';goTo(0); }
+
+/* warm up audio on first interaction anywhere */
+document.body.addEventListener('pointerdown',()=>{try{ac();}catch(e){}},{once:true});
+</script>
+</body>
+</html>
